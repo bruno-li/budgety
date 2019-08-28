@@ -7,7 +7,7 @@ var budgetController = (function(){
     //private properties. Not accessible outside the function
 
 
-// return an object that will be available to be used outside this function. This can be done because of Closures.
+  // return an object that will be available to be used outside this function. This can be done because of Closures.
 
 
 }());
@@ -47,14 +47,29 @@ var UIController = (function(){
 
 // GLOBAL APP CONTROLLER
 var controller = (function(budgetCtrl, UICtrl){
-
+    
     //get the object DOMstring from the UI controller
-    var DOM = UICtrl.getDOMstrings();
+     var DOM = UICtrl.getDOMstrings();
+
+    // function for event listeners
+    var setupEventListeners = function(){
+        // retrive the queryselectors fields from ui controller module
+        var DOM = UICtrl.getDOMstrings();
+        // event listener to when user click the add button
+        document.querySelector(DOM.inputBtn).addEventListener('click',ctrlAddItem);
+        // Global document for return press. .which is for older broweserd that dosent support .keycode
+        document.addEventListener('keypress', function(event){
+            if(event.keyCode === 13 || event.which === 13){
+              ctrlAddItem();
+            }
+        });
+    };
+
+   
 
     var ctrlAddItem = function(){
         // 1. get field input data
         var input = UICtrl.getInput();
-        console.log(input);
         //2. add the item to the budget controller
 
         //3. add the item to the UI
@@ -64,12 +79,16 @@ var controller = (function(budgetCtrl, UICtrl){
         //5. Display the budget on the ui
     };
 
-    document.querySelector(DOM.inputBtn).addEventListener('click',ctrlAddItem);
-
-    // Global document for return press. .which is for older broweserd that dosent support .keycode
-    document.addEventListener('keypress', function(event){
-        if(event.keyCode === 13 || event.which === 13){
-          ctrlAddItem();
+    return {
+        // return a method with the eventlisteners
+        init: function(){
+            setupEventListeners();
+            console.log('app has started')
         }
-    });
+    }
+
+ 
 })(budgetController,UIController);
+
+// start our app to set up event listeners
+controller.init();
