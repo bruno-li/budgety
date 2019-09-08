@@ -15,6 +15,15 @@ var budgetController = (function() {
 		this.value = value;
 	};
 
+    var calculateTotal = function(type){
+        var sum = 0;
+
+        data.allItems[type].forEach(function(cur) {
+            sum += cur.value;
+        });
+        data.totals[type] = sum;
+    };
+
 	// store the data as an object
 	var data = {
 		allItems: {
@@ -25,7 +34,9 @@ var budgetController = (function() {
 		totals: {
 			exp: 0,
 			inc: 0
-		}
+		},
+        budget: 0,
+        percentage: -1
 	};
 
 	// returns a public method with the data
@@ -51,6 +62,32 @@ var budgetController = (function() {
 			// then return the element
 			return newItem;
 		},
+        // method to calculate budget
+        calculateBudget: function(){
+            // calculate total income and expenses
+            calculateTotal('exp');
+            calculateTotal('inc');
+            // calculate the budget: income - expenses
+            data.budget = data.totals.inc - data.totals.exp;
+            // calculate the percentage of the income that we spent
+            if(data.totals.inc > 0) {
+                 data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            } else {
+                // -1 means non existent
+                data.percentage = -1;
+            }
+           
+        },
+        // method to get budget
+        getBudget: function(){
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            };
+        },
+
 		//testing purpose
 		testing: function() {
 			console.log(data);
@@ -157,8 +194,11 @@ var controller = (function(budgetCtrl, UICtrl) {
 
 	var updateBudget = function() {
 		// 1. Calculate budget
+        budgetCtrl.calculateBudget();
 		// 2. Return the budget
+        var budget = budgetCtrl.getBudget();
 		// 3. Display budget on the UI
+        console.log(budget);
 	};
 
 
@@ -167,7 +207,7 @@ var controller = (function(budgetCtrl, UICtrl) {
 		var input, newItem;
 		// 1. get field input data
 		input = UICtrl.getInput();
-        
+
         // Checks for user input, cant be emtpy, not a number and has to be higher than 0
         if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
 
